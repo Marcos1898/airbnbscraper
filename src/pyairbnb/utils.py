@@ -1,5 +1,6 @@
 import re
 from urllib.parse import quote
+import base64
 
 
 regex_space = re.compile(r'[\s ]+')
@@ -41,3 +42,8 @@ def parse_proxy(ip_or_domain: str,port: str, username: str, password: str) -> (s
     encoded_password = quote(password)
     proxy_url = f"http://{encoded_username}:{encoded_password}@{ip_or_domain}:{port}"
     return proxy_url
+
+def encode_product_id(product_id):
+    raw_string = f"StayListing:{product_id}"
+    encoded_bytes = base64.b64encode(raw_string.encode("utf-8"))
+    return encoded_bytes.decode("utf-8")

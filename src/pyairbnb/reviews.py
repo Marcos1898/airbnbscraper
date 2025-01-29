@@ -1,31 +1,31 @@
 from curl_cffi import requests
-import pyairbnb.utils as utils
+import utils as utils
 from urllib.parse import urlencode
 import json
 
-ep="https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d/"
+ep = "https://www.airbnb.com/api/v3/StaysPdpReviewsQuery/dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d/"
 
-def get(product_id: str, api_key: str,proxy_url: str) -> str:
+
+def get(product_id: str, api_key: str, proxy_url: str) -> str:
     offset = 0
     all_reviews = []
-    while True:
-        reviews = get_from_offset(offset,product_id,api_key,proxy_url)
-        offset=offset+50
-        if len(reviews)==0:
-            break
-        all_reviews.extend(reviews)
-    return all_reviews    
 
-def get_from_offset(offset: int,product_id: str, api_key: str,proxy_url: str) -> str:
+    reviews = get_from_offset(offset, product_id, api_key, proxy_url)
+    offset = offset+50
+    all_reviews.extend(reviews)
+    return all_reviews
+
+
+def get_from_offset(offset: int, product_id: str, api_key: str, proxy_url: str) -> str:
     headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "X-Airbnb-Api-Key": api_key,
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "X-Airbnb-Api-Key": api_key,
     }
-    variablesData={
-            "id": product_id,
-            "pdpReviewsRequest":{
+    variablesData = {
+        "id": utils.encode_product_id(product_id),
+        "pdpReviewsRequest": {
             "fieldSelector": "for_p3_translation_only",
             "forPreview": False,
             "limit": 50,
@@ -37,12 +37,11 @@ def get_from_offset(offset: int,product_id: str, api_key: str,proxy_url: str) ->
             "numberOfChildren": "0",
             "numberOfInfants": "0",
             "numberOfPets": "0",
-            "after": None,
         }
     }
-    entension={
+    entension = {
         "persistedQuery": {
-            "version":1,
+            "version": 1,
             "sha256Hash": "dec1c8061483e78373602047450322fd474e79ba9afa8d3dbbc27f504030f91d",
         },
     }
@@ -50,8 +49,8 @@ def get_from_offset(offset: int,product_id: str, api_key: str,proxy_url: str) ->
     dataRawVariables = json.dumps(variablesData)
     query = {
         "operationName": "StaysPdpReviewsQuery",
-        "locale": "en",
-        "currency": "USD",
+        "locale": "es",
+        "currency": "EUR",
         "variables": dataRawVariables,
         "extensions": dataRawExtension,
     }
@@ -60,7 +59,8 @@ def get_from_offset(offset: int,product_id: str, api_key: str,proxy_url: str) ->
     if proxy_url:
         proxies = {"http": proxy_url, "https": proxy_url}
     response = requests.get(url, headers=headers, proxies=proxies, timeout=60)
-    response.raise_for_status() 
+    response.raise_for_status()
     data = response.json()
-    reviews = utils.get_nested_value(data,"data.presentation.stayProductDetailPage.reviews.reviews",{})
+    reviews = utils.get_nested_value(
+        data, "data.presentation.stayProductDetailPage.reviews.reviews", {})
     return reviews

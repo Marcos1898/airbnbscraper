@@ -1,6 +1,6 @@
 
 import pyairbnb.details as details
-import pyairbnb.reviews as reviews
+import reviews as reviews
 import pyairbnb.price as price
 import pyairbnb.api as api
 import pyairbnb.search as search
